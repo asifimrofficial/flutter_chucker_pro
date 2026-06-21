@@ -106,6 +106,7 @@ const ChuckerHttpRecordSchema = CollectionSchema(
     ),
     r'url': PropertySchema(id: 23, name: r'url', type: IsarType.string),
   },
+
   estimateSize: _chuckerHttpRecordEstimateSize,
   serialize: _chuckerHttpRecordSerialize,
   deserialize: _chuckerHttpRecordDeserialize,
@@ -284,10 +285,11 @@ const ChuckerHttpRecordSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _chuckerHttpRecordGetId,
   getLinks: _chuckerHttpRecordGetLinks,
   attach: _chuckerHttpRecordAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _chuckerHttpRecordEstimateSize(
