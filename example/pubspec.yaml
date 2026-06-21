@@ -1,0 +1,19 @@
+name: flutter_chucker_pro_example
+description: Example app for flutter_chucker_pro.
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  dio: ^5.9.2
+  flutter:
+    sdk: flutter
+  flutter_chucker_pro:
+    path: ..
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
