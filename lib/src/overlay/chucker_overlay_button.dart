@@ -32,7 +32,7 @@ class _ChuckerOverlayButtonState extends State<ChuckerOverlayButton> {
   static const Size _collapsedSize = Size(76, 48);
   static const Size _expandedSize = Size(208, 188);
 
-  final SharedPreferencesAsync _preferences = SharedPreferencesAsync();
+  final SharedPreferencesAsync? _preferences = _createPreferences();
   Offset _position = const Offset(_margin, 140);
   bool _expanded = false;
 
@@ -165,8 +165,13 @@ class _ChuckerOverlayButtonState extends State<ChuckerOverlayButton> {
   }
 
   Future<void> _restorePosition() async {
-    final x = await _preferences.getDouble(_xKey);
-    final y = await _preferences.getDouble(_yKey);
+    final preferences = _preferences;
+    if (preferences == null) {
+      return;
+    }
+
+    final x = await preferences.getDouble(_xKey);
+    final y = await preferences.getDouble(_yKey);
     if (!mounted || x == null || y == null) {
       return;
     }
@@ -176,8 +181,21 @@ class _ChuckerOverlayButtonState extends State<ChuckerOverlayButton> {
   }
 
   Future<void> _savePosition() async {
-    await _preferences.setDouble(_xKey, _position.dx);
-    await _preferences.setDouble(_yKey, _position.dy);
+    final preferences = _preferences;
+    if (preferences == null) {
+      return;
+    }
+
+    await preferences.setDouble(_xKey, _position.dx);
+    await preferences.setDouble(_yKey, _position.dy);
+  }
+
+  static SharedPreferencesAsync? _createPreferences() {
+    try {
+      return SharedPreferencesAsync();
+    } on StateError {
+      return null;
+    }
   }
 }
 

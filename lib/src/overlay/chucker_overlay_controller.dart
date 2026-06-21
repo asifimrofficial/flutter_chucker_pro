@@ -6,9 +6,11 @@ import '../ui/chucker_screen.dart';
 import 'chucker_overlay_button.dart';
 
 class ChuckerOverlayController {
+  static const int _maxAttachAttempts = 12;
+
   OverlayEntry? _entry;
 
-  bool get isShowing => _entry != null;
+  bool get isShowing => _entry?.mounted ?? false;
 
   Future<void> show({
     required GlobalKey<NavigatorState> navigatorKey,
@@ -16,20 +18,43 @@ class ChuckerOverlayController {
     required ChuckerCaptureService captureService,
     required Future<void> Function() onOpenLogs,
     required Future<void> Function() onClearLogs,
+  }) {
+    return _show(
+      navigatorKey: navigatorKey,
+      repository: repository,
+      captureService: captureService,
+      onOpenLogs: onOpenLogs,
+      onClearLogs: onClearLogs,
+    );
+  }
+
+  Future<void> _show({
+    required GlobalKey<NavigatorState> navigatorKey,
+    required ChuckerLogRepository repository,
+    required ChuckerCaptureService captureService,
+    required Future<void> Function() onOpenLogs,
+    required Future<void> Function() onClearLogs,
+    int attempt = 0,
   }) async {
-    if (_entry != null) {
+    _clearStaleEntry();
+
+    if (_entry?.mounted ?? false) {
       return;
     }
 
-    final overlay = navigatorKey.currentState?.overlay;
+    final overlay = _overlayFor(navigatorKey);
     if (overlay == null) {
+      if (attempt >= _maxAttachAttempts) {
+        return;
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        show(
+        _show(
           navigatorKey: navigatorKey,
           repository: repository,
           captureService: captureService,
           onOpenLogs: onOpenLogs,
           onClearLogs: onClearLogs,
+          attempt: attempt + 1,
         );
       });
       return;
@@ -66,5 +91,25 @@ class ChuckerOverlayController {
   void hide() {
     _entry?.remove();
     _entry = null;
+  }
+
+  OverlayState? _overlayFor(GlobalKey<NavigatorState> navigatorKey) {
+    final stateOverlay = navigatorKey.currentState?.overlay;
+    if (stateOverlay != null) {
+      return stateOverlay;
+    }
+
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      return null;
+    }
+    return Overlay.maybeOf(context, rootOverlay: true);
+  }
+
+  void _clearStaleEntry() {
+    final entry = _entry;
+    if (entry != null && !entry.mounted) {
+      _entry = null;
+    }
   }
 }

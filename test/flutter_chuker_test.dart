@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_chucker_pro/flutter_chucker_pro.dart';
+import 'package:flutter_chucker_pro/src/core/services/chucker_capture_service.dart';
 
 void main() {
   test('Dio builder captures response metadata and masks headers', () {
@@ -141,6 +142,54 @@ void main() {
     expect(find.text('GET'), findsWidgets);
     expect(find.text('/users'), findsOneWidget);
     expect(find.text('200'), findsOneWidget);
+  });
+
+  testWidgets('overlay can reattach after root app is recreated', (
+    tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final repository = InMemoryChuckerLogRepository();
+    final captureService = ChuckerCaptureService(
+      repository: repository,
+      config: const FlutterChuckerConfig(sessionId: 'test-session'),
+    );
+    final controller = ChuckerOverlayController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        key: const ValueKey<String>('en'),
+        navigatorKey: navigatorKey,
+        home: const SizedBox.shrink(),
+      ),
+    );
+    await controller.show(
+      navigatorKey: navigatorKey,
+      repository: repository,
+      captureService: captureService,
+      onOpenLogs: () async {},
+      onClearLogs: () async {},
+    );
+    await tester.pump();
+    expect(find.byType(ChuckerOverlayButton), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        key: const ValueKey<String>('ur'),
+        navigatorKey: navigatorKey,
+        home: const SizedBox.shrink(),
+      ),
+    );
+    await tester.pump();
+    await controller.show(
+      navigatorKey: navigatorKey,
+      repository: repository,
+      captureService: captureService,
+      onOpenLogs: () async {},
+      onClearLogs: () async {},
+    );
+    await tester.pump();
+
+    expect(find.byType(ChuckerOverlayButton), findsOneWidget);
   });
 }
 
