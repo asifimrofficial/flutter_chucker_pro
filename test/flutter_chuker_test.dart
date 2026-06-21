@@ -180,13 +180,6 @@ void main() {
       ),
     );
     await tester.pump();
-    await controller.show(
-      navigatorKey: navigatorKey,
-      repository: repository,
-      captureService: captureService,
-      onOpenLogs: () async {},
-      onClearLogs: () async {},
-    );
     await tester.pump();
 
     expect(find.byType(ChuckerOverlayButton), findsOneWidget);

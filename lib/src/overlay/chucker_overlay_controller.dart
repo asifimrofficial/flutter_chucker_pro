@@ -9,6 +9,7 @@ class ChuckerOverlayController {
   static const int _maxAttachAttempts = 12;
 
   OverlayEntry? _entry;
+  VoidCallback? _entryListener;
 
   bool get isShowing => _entry?.mounted ?? false;
 
@@ -60,7 +61,27 @@ class ChuckerOverlayController {
       return;
     }
 
-    _entry = OverlayEntry(
+    late final OverlayEntry entry;
+    void handleMountChange() {
+      if (entry.mounted || !identical(_entry, entry)) {
+        return;
+      }
+
+      entry.removeListener(handleMountChange);
+      _entry = null;
+      _entryListener = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _show(
+          navigatorKey: navigatorKey,
+          repository: repository,
+          captureService: captureService,
+          onOpenLogs: onOpenLogs,
+          onClearLogs: onClearLogs,
+        );
+      });
+    }
+
+    entry = OverlayEntry(
       builder: (context) => ChuckerOverlayButton(
         repository: repository,
         captureService: captureService,
@@ -68,7 +89,10 @@ class ChuckerOverlayController {
         onClearLogs: onClearLogs,
       ),
     );
-    overlay.insert(_entry!);
+    entry.addListener(handleMountChange);
+    _entry = entry;
+    _entryListener = handleMountChange;
+    overlay.insert(entry);
   }
 
   Future<void> openDashboard({
@@ -89,8 +113,13 @@ class ChuckerOverlayController {
   }
 
   void hide() {
+    final listener = _entryListener;
+    if (listener != null) {
+      _entry?.removeListener(listener);
+    }
     _entry?.remove();
     _entry = null;
+    _entryListener = null;
   }
 
   OverlayState? _overlayFor(GlobalKey<NavigatorState> navigatorKey) {
@@ -109,7 +138,12 @@ class ChuckerOverlayController {
   void _clearStaleEntry() {
     final entry = _entry;
     if (entry != null && !entry.mounted) {
+      final listener = _entryListener;
+      if (listener != null) {
+        entry.removeListener(listener);
+      }
       _entry = null;
+      _entryListener = null;
     }
   }
 }
