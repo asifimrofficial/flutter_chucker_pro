@@ -4,7 +4,7 @@ import '../../overlay/chucker_overlay_controller.dart';
 import '../config/flutter_chucker_config.dart';
 import '../export/chucker_json_exporter.dart';
 import '../repository/chucker_log_repository.dart';
-import '../repository/isar_chucker_log_repository.dart';
+import '../repository/sembast_chucker_log_repository.dart';
 import 'chucker_capture_service.dart';
 
 abstract final class FlutterChucker {
@@ -101,7 +101,7 @@ class FlutterChuckerController {
 
     _config = resolvedConfig;
     _navigatorKey = navigatorKey;
-    _repository = repository ?? await IsarChuckerLogRepository.open();
+    _repository = repository ?? await SembastChuckerLogRepository.open();
     _ownsRepository = repository == null;
     _captureService = ChuckerCaptureService(
       repository: _repository!,

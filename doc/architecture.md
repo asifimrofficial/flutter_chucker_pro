@@ -6,9 +6,9 @@
 
 - `lib/src/core`
   - configuration
-  - Isar data model and generated schema
+  - request data model
   - repository interface
-  - Isar and in-memory repository implementations
+  - Sembast and in-memory repository implementations
   - capture service
   - JSON, cURL, and share utilities
   - timeline event interfaces for future event sources

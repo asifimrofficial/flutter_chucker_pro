@@ -1,13 +1,8 @@
 import 'dart:convert';
 
-import 'package:isar_community/isar.dart';
-
-part 'chucker_http_record.g.dart';
-
-@collection
 class ChuckerHttpRecord {
   ChuckerHttpRecord({
-    this.id = Isar.autoIncrement,
+    this.id = autoIncrementId,
     required this.sessionId,
     required this.source,
     required this.method,
@@ -34,47 +29,36 @@ class ChuckerHttpRecord {
     this.errorType,
   });
 
-  Id id;
+  static const int autoIncrementId = -1;
 
-  @Index(type: IndexType.hash)
+  int id;
+
   late String sessionId;
 
-  @Index(type: IndexType.hash)
   late String source;
 
-  @Index(type: IndexType.hash, caseSensitive: false)
   late String method;
 
-  @Index(type: IndexType.hash, caseSensitive: false)
   late String host;
 
-  @Index(type: IndexType.value, caseSensitive: false)
   late String path;
 
-  @Index(type: IndexType.value, caseSensitive: false)
   late String searchableText;
 
   late String url;
 
-  @Index()
   late DateTime startedAt;
 
-  @Index()
   late DateTime endedAt;
 
-  @Index()
   late int durationMs;
 
-  @Index()
   int? statusCode;
 
-  @Index()
   late bool hasError;
 
-  @Index()
   late bool isCancelled;
 
-  @Index()
   late bool isSlow;
 
   late int requestSize;
@@ -88,19 +72,15 @@ class ChuckerHttpRecord {
   String? error;
   String? errorType;
 
-  @ignore
   Map<String, Object?> get requestHeaders =>
       _decodeMap(requestHeadersJson).cast<String, Object?>();
 
-  @ignore
   Map<String, Object?> get responseHeaders =>
       _decodeMap(responseHeadersJson).cast<String, Object?>();
 
-  @ignore
   Map<String, Object?> get queryParameters =>
       _decodeMap(queryParametersJson).cast<String, Object?>();
 
-  @ignore
   String get statusLabel {
     if (isCancelled) {
       return 'Cancelled';
@@ -108,7 +88,6 @@ class ChuckerHttpRecord {
     return statusCode?.toString() ?? (hasError ? 'ERR' : '-');
   }
 
-  @ignore
   String get routeLabel {
     final parsed = Uri.tryParse(url);
     final displayPath = parsed?.path.isNotEmpty == true ? parsed!.path : path;
@@ -119,15 +98,12 @@ class ChuckerHttpRecord {
     return '$displayPath?$query';
   }
 
-  @ignore
   bool get isSuccess =>
       statusCode != null && statusCode! >= 200 && statusCode! < 300;
 
-  @ignore
   bool get isClientError =>
       statusCode != null && statusCode! >= 400 && statusCode! < 500;
 
-  @ignore
   bool get isServerError => statusCode != null && statusCode! >= 500;
 
   Map<String, Object?> toJson() {
@@ -164,6 +140,66 @@ class ChuckerHttpRecord {
     };
   }
 
+  Map<String, Object?> toStorageJson() {
+    return <String, Object?>{
+      'id': id,
+      'sessionId': sessionId,
+      'source': source,
+      'method': method,
+      'url': url,
+      'host': host,
+      'path': path,
+      'searchableText': searchableText,
+      'startedAt': startedAt.toIso8601String(),
+      'endedAt': endedAt.toIso8601String(),
+      'durationMs': durationMs,
+      'statusCode': statusCode,
+      'hasError': hasError,
+      'isCancelled': isCancelled,
+      'isSlow': isSlow,
+      'requestSize': requestSize,
+      'responseSize': responseSize,
+      'requestHeadersJson': requestHeadersJson,
+      'responseHeadersJson': responseHeadersJson,
+      'queryParametersJson': queryParametersJson,
+      'requestBody': requestBody,
+      'responseBody': responseBody,
+      'contentType': contentType,
+      'error': error,
+      'errorType': errorType,
+    };
+  }
+
+  factory ChuckerHttpRecord.fromStorageJson(Map<String, Object?> json) {
+    return ChuckerHttpRecord(
+      id: _asInt(json['id']) ?? autoIncrementId,
+      sessionId: _asString(json['sessionId']),
+      source: _asString(json['source']),
+      method: _asString(json['method']),
+      url: _asString(json['url']),
+      host: _asString(json['host']),
+      path: _asString(json['path']),
+      searchableText: _asString(json['searchableText']),
+      startedAt: _asDateTime(json['startedAt']),
+      endedAt: _asDateTime(json['endedAt']),
+      durationMs: _asInt(json['durationMs']) ?? 0,
+      statusCode: _asInt(json['statusCode']),
+      hasError: _asBool(json['hasError']),
+      isCancelled: _asBool(json['isCancelled']),
+      isSlow: _asBool(json['isSlow']),
+      requestSize: _asInt(json['requestSize']) ?? 0,
+      responseSize: _asInt(json['responseSize']) ?? 0,
+      requestHeadersJson: _asString(json['requestHeadersJson']),
+      responseHeadersJson: _asString(json['responseHeadersJson']),
+      queryParametersJson: _asString(json['queryParametersJson']),
+      requestBody: json['requestBody'] as String?,
+      responseBody: json['responseBody'] as String?,
+      contentType: json['contentType'] as String?,
+      error: json['error'] as String?,
+      errorType: json['errorType'] as String?,
+    );
+  }
+
   static String encodeMap(Map<String, Object?> value) => jsonEncode(value);
 
   static String buildSearchableText({
@@ -197,5 +233,31 @@ class ChuckerHttpRecord {
       return decoded.map((key, value) => MapEntry(key.toString(), value));
     }
     return <String, dynamic>{};
+  }
+
+  static String _asString(Object? value) => value?.toString() ?? '';
+
+  static int? _asInt(Object? value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  static bool _asBool(Object? value) {
+    if (value is bool) {
+      return value;
+    }
+    return value?.toString() == 'true';
+  }
+
+  static DateTime _asDateTime(Object? value) {
+    if (value is DateTime) {
+      return value;
+    }
+    return DateTime.tryParse(value?.toString() ?? '') ?? DateTime.now().toUtc();
   }
 }

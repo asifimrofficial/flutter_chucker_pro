@@ -1,6 +1,6 @@
 # flutter_chucker_pro
 
-`flutter_chucker_pro` is an in-app network inspection toolkit for Flutter. It captures Dio traffic, persists requests with Isar, and exposes a draggable floating overlay that opens a Material 3 dashboard inside the running app.
+`flutter_chucker_pro` is an in-app network inspection toolkit for Flutter. It captures Dio traffic, persists requests with a pure-Dart Sembast store, and exposes a draggable floating overlay that opens a Material 3 dashboard inside the running app.
 
 The package is router-agnostic and notification-agnostic. It only needs a `navigatorKey` if you want the built-in overlay to open the dashboard for you.
 
@@ -13,7 +13,7 @@ The package is router-agnostic and notification-agnostic. It only needs a `navig
 - Header masking for secrets such as `Authorization` and `Cookie`
 - JSON session export and platform sharing
 - cURL generation for headers, JSON bodies, and multipart form metadata
-- Isar-backed persistence with automatic oldest-request cleanup
+- Pure-Dart persistence with automatic oldest-request cleanup
 - Extension interfaces for future BLoC, navigation, notifications, and crash modules
 
 ## Install
@@ -104,7 +104,7 @@ There is also a conventional pub.dev sample in `example/`.
 
 The package is structured as logical modules under `lib/src`:
 
-- `core`: config, models, Isar schemas, repositories, capture services, JSON/cURL/share export
+- `core`: config, models, repositories, capture services, JSON/cURL/share export
 - `dio`: Dio interceptor and request serialization
 - `ui`: request list and details screens
 - `overlay`: draggable overlay and overlay controller
@@ -112,12 +112,6 @@ The package is structured as logical modules under `lib/src`:
 This keeps the first release simple to install while preserving boundaries for future packages such as `flutter_chucker_bloc`, `flutter_chucker_navigation`, and `flutter_chucker_notifications`.
 
 ## Development
-
-Isar schemas are generated. If you change `ChuckerHttpRecord`, run:
-
-```sh
-dart run build_runner build --delete-conflicting-outputs
-```
 
 Run checks:
 

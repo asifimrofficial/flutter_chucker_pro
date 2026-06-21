@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:isar_community/isar.dart';
-
 import '../models/chucker_http_record.dart';
 import '../models/chucker_log_query.dart';
 import '../models/chucker_stats.dart';
@@ -15,7 +13,7 @@ class InMemoryChuckerLogRepository implements ChuckerLogRepository {
 
   @override
   Future<void> save(ChuckerHttpRecord record) async {
-    if (record.id == Isar.autoIncrement) {
+    if (record.id == ChuckerHttpRecord.autoIncrementId) {
       record.id = _nextId++;
     }
     _records.removeWhere((item) => item.id == record.id);

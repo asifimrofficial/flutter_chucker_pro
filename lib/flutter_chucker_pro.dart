@@ -8,6 +8,7 @@ export 'src/core/models/chucker_stats.dart';
 export 'src/core/models/chucker_timeline_event.dart';
 export 'src/core/repository/chucker_log_repository.dart';
 export 'src/core/repository/in_memory_chucker_log_repository.dart';
+export 'src/core/repository/sembast_chucker_log_repository.dart';
 export 'src/core/services/flutter_chucker.dart';
 export 'src/dio/chucker_interceptor.dart';
 export 'src/overlay/chucker_overlay_button.dart';
